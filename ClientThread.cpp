@@ -51,25 +51,18 @@ void ClientThread::run(){
 
 	while(need_to_send){
 		Tftp::sendPacket(socket,client_address,client_port,packet_to_send);
-		std::cout<<"sent packet "<<packets_sent<<std::endl;
 		bool received;
 
-		std::cout<<"wait for ack..."<<std::endl;
 		do{
 			received=waitNewPacket(to_handle);
-			if(to_handle.getAckCode()<packets_sent)
-				std::cout<<"discard ack"<<to_handle.getAckCode()<<std::endl;
 		}
 		while(received && to_handle.getAckCode()<packets_sent);
-		if(received)
-			std::cout<<"ack received "<<to_handle.getAckCode()<<std::endl;
-
 
 		if(received && to_handle.getOpcode()==Tftp::Opcode::Ack &&to_handle.readInt()==packets_sent){	
 
 			if(reachedEnd(in)){
 
-				std::cout<<"FINISHED"<<std::endl;
+				std::cout<<"finished"<<std::endl;
 				need_to_send=false;
 			}
 
