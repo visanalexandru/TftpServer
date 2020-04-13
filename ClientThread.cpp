@@ -7,7 +7,6 @@ ClientThread::ClientThread(const std::string&add,unsigned port,const std::string
 	client_address(add),
 	file_name(file),
 	client_port(port),
-	hasPendingPacket(false),
 	running(false),
 	socket(sock)
 {
@@ -17,7 +16,7 @@ ClientThread::ClientThread(const std::string&add,unsigned port,const std::string
 }
 
 bool ClientThread::needsToWake(){
-	return hasPendingPacket;
+	return pendingPackets.size();
 }
 
 
@@ -25,8 +24,8 @@ bool ClientThread::waitNewPacket(Tftp::Packet&packet){
 	std::unique_lock<std::mutex> lk(lock);
 	bool status=cv.wait_for(lk, 1s,[this]{return needsToWake();});
 	if(status){
-		packet=pendingPacket;
-		hasPendingPacket=false;
+		packet=pendingPackets.front();
+		pendingPackets.pop_front();
 	}
 	return status;
 }
@@ -84,8 +83,7 @@ bool ClientThread::isRunning(){
 
 void ClientThread::handlePacket(const Tftp::Packet&packet){
 	lock.lock();
-	pendingPacket=packet;
-	hasPendingPacket=true;
+	pendingPackets.push_back(packet);
 	lock.unlock();
 	cv.notify_one();
 }

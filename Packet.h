@@ -19,6 +19,7 @@ namespace Tftp{
 			unsigned write_cursor;
 		public:	
 			Opcode getOpcode() const;
+			unsigned getAckCode() const;
 			Packet();
 			std::string readString();
 			unsigned readInt();

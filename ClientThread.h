@@ -8,6 +8,7 @@
 #include<iostream>
 #include<fstream>
 #include<atomic>
+#include<deque>
 #include"UdpSock.h"
 
 
@@ -18,8 +19,7 @@ class ClientThread{
 		const unsigned client_port;
 
 
-		Tftp::Packet pendingPacket;
-		bool hasPendingPacket;
+		std::deque<Tftp::Packet> pendingPackets;
 		std::atomic<bool> running;
 		UdpSock&socket;
 

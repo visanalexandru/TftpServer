@@ -32,6 +32,12 @@ namespace Tftp{
 		read_cursor++;
 		return result;
 	}
+	unsigned Packet::getAckCode() const{
+		uint16_t ack;
+		memcpy(&ack,data+2,2);
+		return ntohs(ack);
+
+	}
 	unsigned Packet::getSize() const{
 		return write_cursor;
 	}
