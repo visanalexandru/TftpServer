@@ -39,7 +39,6 @@ void ClientThread::run(){
 	char buffer[512];
 	int packets_sent=1;
 
-	Tftp::sendPacket(socket,client_address,client_port,Tftp::createAckPacket(0));
 	std::ifstream in(file_name, std::ifstream::binary);
 
 	in.read(buffer,512);
