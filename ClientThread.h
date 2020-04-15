@@ -33,8 +33,11 @@ class ClientThread{
 		bool reachedEnd(const std::ifstream&in);
 	public:
 		ClientThread(const std::string&add,unsigned port,const std::string&file,UdpSock&sock);
+		~ClientThread();
 		void handlePacket(const Tftp::Packet&packet);
-		bool isRunning();
+		bool isRunning() const;
+		std::string getAddress() const;
+		unsigned getPort() const;
 };
 
 #endif

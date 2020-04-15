@@ -6,3 +6,4 @@ project(Tftp)
 
 add_executable(Tftp  main.cpp UdpSock.cpp Packet.cpp Tftp.cpp ClientThread.cpp)
 target_link_libraries(Tftp pthread)
+target_compile_options(Tftp PRIVATE -g)

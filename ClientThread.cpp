@@ -7,12 +7,15 @@ ClientThread::ClientThread(const std::string&add,unsigned port,const std::string
 	client_address(add),
 	file_name(file),
 	client_port(port),
-	running(false),
+	running(true),
 	socket(sock)
 {
 
 	th =std::thread(&ClientThread::run,this);
 
+}
+ClientThread::~ClientThread(){
+	th.join();
 }
 
 bool ClientThread::needsToWake(){
@@ -33,9 +36,6 @@ bool ClientThread::reachedEnd(const std::ifstream&in){
 	return (in.rdstate() & std::ifstream::failbit ); 	
 }
 void ClientThread::run(){
-	running=true;
-
-
 	char buffer[512];
 	int packets_sent=1;
 
@@ -57,6 +57,7 @@ void ClientThread::run(){
 			received=waitNewPacket(to_handle);
 		}
 		while(received && to_handle.getAckCode()<packets_sent);
+
 
 		if(received && to_handle.getOpcode()==Tftp::Opcode::Ack &&to_handle.readInt()==packets_sent){	
 
@@ -81,7 +82,7 @@ void ClientThread::run(){
 	}
 	running=false;
 }
-bool ClientThread::isRunning(){
+bool ClientThread::isRunning() const{
 	return running;
 }
 
@@ -92,3 +93,11 @@ void ClientThread::handlePacket(const Tftp::Packet&packet){
 	lock.unlock();
 	cv.notify_one();
 }
+
+std::string ClientThread::getAddress() const{
+	return client_address;
+}
+unsigned ClientThread::getPort() const{
+	return client_port;
+}
+
