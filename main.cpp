@@ -45,14 +45,10 @@ void server(){
 		Tftp::receivePacket(socket,received,remote_address,remote_port);
 		ClientThread*source=findClient(remote_address,remote_port);
 
-		if(received.getOpcode()==Tftp::Opcode::Read){
+		if(received.getOpcode()==Tftp::Opcode::Read && source==nullptr){
 			string filename=received.readString();
 			cout<<"new read request "<<filename<<endl;
-			if(!source)
-				client_threads.push_back(new ClientThread(remote_address,remote_port,filename,socket));
-
-			//if the client is already in the clients list, just ignore the packet,it will timeout and the destination
-			//thread will resend the first packet
+			client_threads.push_back(new ClientThread(remote_address,remote_port,filename,socket));
 		}
 		else{
 			if(source)

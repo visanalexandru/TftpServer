@@ -54,7 +54,7 @@ void ClientThread::run(){
 	while(need_to_send){
 
 		bool received=getResponse(packet_to_send,to_handle);
-
+	
 		if(received){
 			if(to_handle.getOpcode()==Tftp::Opcode::Ack &&to_handle.readInt()==packets_sent){
 				if(reachedEnd(in)){
@@ -68,9 +68,12 @@ void ClientThread::run(){
 					packet_to_send=Tftp::createDataPacket(buffer,in.gcount(),packets_sent);
 				}
 			}
+			else{
+				std::cout<<"invalid packet"<<std::endl;
+			}
 		}
 		else{
-			std::cout<<"timed out";
+			std::cout<<"timed out"<<std::endl;
 			need_to_send=false;
 		}
 
