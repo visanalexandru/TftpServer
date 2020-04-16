@@ -28,7 +28,7 @@ bool ClientThread::getResponse(Tftp::Packet&to_send,Tftp::Packet&packet){
 	std::unique_lock<std::mutex> lk(lock);
 	has_pending=false;
 	Tftp::sendPacket(socket,client_address,client_port,to_send);
-	bool status=cv.wait_for(lk, 1s,[this]{return needsToWake();});
+	bool status=cv.wait_for(lk, 5s,[this]{return needsToWake();});
 	if(status){
 		packet=pendingPacket;
 		has_pending=false;
@@ -53,25 +53,25 @@ void ClientThread::run(){
 
 	while(need_to_send){
 
-	bool received=getResponse(packet_to_send,to_handle);
+		bool received=getResponse(packet_to_send,to_handle);
 
-		if(received && to_handle.getOpcode()==Tftp::Opcode::Ack &&to_handle.readInt()==packets_sent){	
-			if(reachedEnd(in)){
+		if(received){
+			if(to_handle.getOpcode()==Tftp::Opcode::Ack &&to_handle.readInt()==packets_sent){
+				if(reachedEnd(in)){
 
-				std::cout<<"finished"<<std::endl;
-				need_to_send=false;
-			}
-
-			else{
-				packets_sent++;
-				in.read(buffer,512);
-				packet_to_send=Tftp::createDataPacket(buffer,in.gcount(),packets_sent);
+					std::cout<<"finished"<<std::endl;
+					need_to_send=false;
+				}
+				else{
+					packets_sent++;
+					in.read(buffer,512);
+					packet_to_send=Tftp::createDataPacket(buffer,in.gcount(),packets_sent);
+				}
 			}
 		}
 		else{
-			if(!received)
-				std::cout<<"timed out,retrying"<<std::endl;
-			else std::cout<<"packet was invalid,retrying"<<std::endl;
+			std::cout<<"timed out";
+			need_to_send=false;
 		}
 
 	}
