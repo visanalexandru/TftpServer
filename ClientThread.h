@@ -19,7 +19,8 @@ class ClientThread{
 		const unsigned client_port;
 
 
-		std::deque<Tftp::Packet> pendingPackets;
+		Tftp::Packet pendingPacket;
+		bool has_pending;
 		std::atomic<bool> running;
 		UdpSock&socket;
 
@@ -27,7 +28,7 @@ class ClientThread{
 		std::condition_variable cv;
 		std::thread th;
 
-		bool waitNewPacket(Tftp::Packet&packet);
+		bool getResponse(Tftp::Packet&to_send,Tftp::Packet&packet);
 		void run();
 		bool needsToWake();
 		bool reachedEnd(const std::ifstream&in);
