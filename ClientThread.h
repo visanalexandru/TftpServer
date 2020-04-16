@@ -22,6 +22,7 @@ class ClientThread{
 		Tftp::Packet pendingPacket;
 		bool has_pending;
 		std::atomic<bool> running;
+		std::atomic<int> curr_packet_index;
 		UdpSock&socket;
 
 		std::mutex lock;
