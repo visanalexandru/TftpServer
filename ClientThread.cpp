@@ -1,6 +1,6 @@
 #include "ClientThread.h"
-#include <chrono>
-using namespace std::chrono_literals;
+
+
 
 
 ClientThread::ClientThread(const std::string&add,unsigned port,const std::string&file,UdpSock&sock):
@@ -29,7 +29,7 @@ bool ClientThread::getResponse(Tftp::Packet&to_send,Tftp::Packet&packet){
 	std::unique_lock<std::mutex> lk(lock);
 	has_pending=false;
 	Tftp::sendPacket(socket,client_address,client_port,to_send);
-	bool status=cv.wait_for(lk, 5s,[this]{return needsToWake();});
+	bool status=cv.wait_for(lk, packet_timeout,[this]{return needsToWake();});
 	if(status){
 		packet=pendingPacket;
 		has_pending=false;
@@ -51,13 +51,14 @@ void ClientThread::run(){
 
 	bool need_to_send=true;
 
+	unsigned timed_out=0;
+
 
 	while(need_to_send){
 		bool received=getResponse(packet_to_send,to_handle);
 
 		if(received){
 			if(reachedEnd(in)){
-
 				std::cout<<"finished"<<std::endl;
 				need_to_send=false;
 			}
@@ -66,9 +67,15 @@ void ClientThread::run(){
 				in.read(buffer,512);
 				packet_to_send=Tftp::createDataPacket(buffer,in.gcount(),curr_packet_index);
 			}
+			timed_out=0;
 		}	
 		else{
+			timed_out++;
 			std::cout<<"timed out"<<std::endl;
+			if(timed_out==packet_timeout_limit){
+				std::cout<<"packet timeout limit reached"<<std::endl;
+				need_to_send=false;
+			}
 		}
 
 	}

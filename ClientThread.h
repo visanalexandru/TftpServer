@@ -11,13 +11,16 @@
 #include<deque>
 #include"UdpSock.h"
 
+#include <chrono>
+using namespace std::chrono_literals;
 
 class ClientThread{
 	private:
 		const std::string client_address;
 		const std::string file_name;
 		const unsigned client_port;
-
+		const std::chrono::seconds packet_timeout=5s;
+		const unsigned packet_timeout_limit=3;
 
 		Tftp::Packet pendingPacket;
 		bool has_pending;
