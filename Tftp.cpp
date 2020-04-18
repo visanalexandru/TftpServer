@@ -6,7 +6,7 @@ namespace Tftp{
 	UdpSock::Status receivePacket(const UdpSock&socket,Packet&packet,std::string&address,unsigned&port){
 		unsigned received;
 		
-		UdpSock::Status status=socket.receive(address,port,packet.data,512,received);
+		UdpSock::Status status=socket.receive(address,port,packet.data,516,received);
 		packet.write_cursor=received;
 		packet.read_cursor=2;
 		return status;
@@ -19,7 +19,7 @@ namespace Tftp{
 	Packet createAckPacket(unsigned ackId){
 		Packet to_return;	
 		to_return.addInt(4);
-		to_return.addInt(0);
+		to_return.addInt(ackId);
 		return to_return;
 	
 	}

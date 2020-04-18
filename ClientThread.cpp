@@ -42,7 +42,7 @@ bool ClientThread::reachedEnd(const std::ifstream&in){
 }
 
 void ClientThread::receiveFile(){
-	std::ofstream out(file_name,std::ofstream::binary|std::ofstream::app);
+	std::ofstream out(file_name,std::ios::binary);
 	bool need_to_send=true;
 	curr_packet_index=0;
 	Tftp::Packet packet_to_send,to_handle;
@@ -54,15 +54,14 @@ void ClientThread::receiveFile(){
 		bool received=getResponse(packet_to_send,to_handle);
 
 		if(received){
-			unsigned packet_size=to_handle.getSize();
-			memcpy(buffer,to_handle.getData()+4,packet_size-4);
-			out.write(buffer,packet_size);
-			if(packet_size<512){
+			curr_packet_index++;
+			unsigned data_size=to_handle.getSize()-4;
+			memcpy(buffer,to_handle.getData()+4,data_size);
+			out.write(buffer,data_size);
+			if(data_size<512){
+				Tftp::sendPacket(socket,client_address,client_port,Tftp::createAckPacket(curr_packet_index));
 				std::cout<<"finished receiving"<<std::endl;
 				need_to_send=false;
-			}
-			else{
-				curr_packet_index++;
 			}
 		}
 		else{
@@ -115,7 +114,10 @@ void ClientThread::sendFile(){
 	}
 }
 void ClientThread::run(){
-	sendFile();	
+	if(isReceiving)
+		receiveFile();
+	else 
+		sendFile();	
 	running=false;
 }
 bool ClientThread::isRunning() const{

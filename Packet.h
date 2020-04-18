@@ -14,7 +14,7 @@ namespace Tftp{
 	};
 	class Packet{
 		private:
-			char data[512];
+			char data[516];
 			unsigned read_cursor;
 			unsigned write_cursor;
 		public:	
