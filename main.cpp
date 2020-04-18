@@ -45,20 +45,19 @@ void server(){
 		Tftp::receivePacket(socket,received,remote_address,remote_port);
 		ClientThread*source=findClient(remote_address,remote_port);
 
-		if(received.getOpcode()==Tftp::Opcode::Read && source==nullptr){
+		if(source)
+			source->handlePacket(received);
+		else if(received.getOpcode()==Tftp::Opcode::Read){
 			string filename=received.readString();
 			cout<<"new read request "<<filename<<endl;
 			client_threads.push_back(new ClientThread(remote_address,remote_port,filename,socket,false));
 		}
-		else if(received.getOpcode()==Tftp::Opcode::Write && source==nullptr){
+		else if(received.getOpcode()==Tftp::Opcode::Write){
+
 			string filename=received.readString();
 			cout<<"new write request "<<filename<<endl;
 			client_threads.push_back(new ClientThread(remote_address,remote_port,filename,socket,true));
 		}
-		else{
-			if(source)
-				source->handlePacket(received);
-		}	
 	}
 }
 

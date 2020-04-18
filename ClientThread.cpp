@@ -60,7 +60,7 @@ void ClientThread::receiveFile(){
 			out.write(buffer,data_size);
 			if(data_size<512){
 				Tftp::sendPacket(socket,client_address,client_port,Tftp::createAckPacket(curr_packet_index));
-				std::cout<<"finished receiving"<<std::endl;
+				std::cout<<"finished receiving file"<<std::endl;
 				need_to_send=false;
 			}
 		}
@@ -92,7 +92,7 @@ void ClientThread::sendFile(){
 
 		if(received){
 			if(reachedEnd(in)){
-				std::cout<<"finished"<<std::endl;
+				std::cout<<"finished sending file"<<std::endl;
 				need_to_send=false;
 			}
 			else{
