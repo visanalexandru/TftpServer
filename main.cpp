@@ -48,7 +48,7 @@ void server(){
 		if(received.getOpcode()==Tftp::Opcode::Read && source==nullptr){
 			string filename=received.readString();
 			cout<<"new read request "<<filename<<endl;
-			client_threads.push_back(new ClientThread(remote_address,remote_port,filename,socket));
+			client_threads.push_back(new ClientThread(remote_address,remote_port,filename,socket,true));
 		}
 		else{
 			if(source)

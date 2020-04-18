@@ -18,6 +18,7 @@ class ClientThread{
 	private:
 		const std::string client_address;
 		const std::string file_name;
+		const bool isReceiving;
 		const unsigned client_port;
 		const std::chrono::seconds packet_timeout=5s;
 		const unsigned packet_timeout_limit=3;
@@ -34,10 +35,12 @@ class ClientThread{
 
 		bool getResponse(Tftp::Packet&to_send,Tftp::Packet&packet);
 		void run();
+		void sendFile();
+		void receiveFile();
 		bool needsToWake();
 		bool reachedEnd(const std::ifstream&in);
 	public:
-		ClientThread(const std::string&add,unsigned port,const std::string&file,UdpSock&sock);
+		ClientThread(const std::string&add,unsigned port,const std::string&file,UdpSock&sock,bool receive);
 		~ClientThread();
 		void handlePacket(const Tftp::Packet&packet);
 		bool isRunning() const;
