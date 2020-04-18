@@ -44,17 +44,26 @@ bool ClientThread::reachedEnd(const std::ifstream&in){
 void ClientThread::receiveFile(){
 	std::ofstream out(file_name,std::ofstream::binary|std::ofstream::app);
 	bool need_to_send=true;
-
-	Tftp::Packet packet_to_send=Tftp::createAckPacket(0),to_handle;
+	curr_packet_index=0;
+	Tftp::Packet packet_to_send,to_handle;
 	unsigned timed_out=0;
+	char buffer[512];
 
 	while(need_to_send){
+		packet_to_send=Tftp::createAckPacket(curr_packet_index);
 		bool received=getResponse(packet_to_send,to_handle);
 
 		if(received){
 			unsigned packet_size=to_handle.getSize();
-
-
+			memcpy(buffer,to_handle.getData()+4,packet_size-4);
+			out.write(buffer,packet_size);
+			if(packet_size<512){
+				std::cout<<"finished receiving"<<std::endl;
+				need_to_send=false;
+			}
+			else{
+				curr_packet_index++;
+			}
 		}
 		else{
 			timed_out++;
@@ -63,10 +72,7 @@ void ClientThread::receiveFile(){
 				std::cout<<"packet timeout limit reached"<<std::endl;
 				need_to_send=false;
 			}
-
-
 		}
-
 	}
 }
 
@@ -117,11 +123,21 @@ bool ClientThread::isRunning() const{
 }
 
 
+bool ClientThread::isValid(const Tftp::Packet&to_check){
+	if(isReceiving){
+		return to_check.getOpcode()==Tftp::Opcode::Data && to_check.getBlockId()==curr_packet_index+1;
+	}
+	else{
+		return to_check.getOpcode()==Tftp::Opcode::Ack && to_check.getBlockId()==curr_packet_index;
+	}
+}
+
 void ClientThread::handlePacket(const Tftp::Packet&packet){
 
 
 	std::unique_lock<std::mutex> lk(lock);
-	if(packet.getOpcode()==Tftp::Opcode::Ack &&packet.getBlockId()==curr_packet_index){
+	if(isValid(packet)){
+
 		pendingPacket=packet;
 		has_pending=true;
 		cv.notify_one();

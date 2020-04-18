@@ -39,6 +39,7 @@ class ClientThread{
 		void receiveFile();
 		bool needsToWake();
 		bool reachedEnd(const std::ifstream&in);
+		bool isValid(const Tftp::Packet&to_check);
 	public:
 		ClientThread(const std::string&add,unsigned port,const std::string&file,UdpSock&sock,bool receive);
 		~ClientThread();
